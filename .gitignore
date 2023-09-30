@@ -4,8 +4,13 @@ __pycache__/
 *$py.class
 
 # C extensions
+records/
 *.so
-
+*.m4a
+*.wav
+*.RPP*
+.DS_Store
+*.reapeaks
 # Distribution / packaging
 .Python
 build/

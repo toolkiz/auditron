@@ -1,6 +1,8 @@
+
+import asyncio
+
 from pathlib import Path
 from time import time_ns
-
 from reduct import Client, BucketSettings, QuotaType
 
 CURRENT_FILE = Path(__file__)
@@ -65,6 +67,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    import asyncio
 
     asyncio.run(main())

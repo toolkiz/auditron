@@ -1,20 +1,17 @@
 # get the libraries
-import pyaudio
+import sounddevice as sd
 import time
 from scipy.io.wavfile import write
 import numpy as np
 import asyncio
-from scipy.stats import entropy
-from scipy.signal import hilbert
+import zlib
 
 from pathlib import Path
 from time import time_ns
 from reduct import Client, BucketSettings, QuotaType
 
-CHUNK = 12000
+CHUNK = 24000
 RECORD_SECONDS = 10
-FORMAT = pyaudio.paInt16
-RATE = CHUNK
 
 async def main():
     # create the pyaudio instance
@@ -34,6 +31,7 @@ async def main():
 
         # retrieve the constants
         CHANNELS = info['maxInputChannels']
+        RATE = info['defaultSampleRate']
         WAVE_OUTPUT_FILENAME = "output_test_0.wav"
 
         async with Client("http://localhost:8383") as client:
@@ -50,11 +48,11 @@ async def main():
                 print("Recording...")
                 while time.time() - start_time < RECORD_SECONDS:
                     data = stream.read(CHUNK)
-                    await bucket.write(f"auditron_12KHz", data)
+                    await bucket.write(f"auditron_zipped", data)
                     frames.append(data)
             except KeyboardInterrupt:
                 print("Recording stopped by user")
-
+            
             # put them in reduct database
             stream.stop_stream()
             stream.close()

@@ -31,41 +31,29 @@ def find_device():
 
 def set_phantom_power(channel, power_on):
     # 48V (channel 1). First byte is 0x01 or 0x00 for on or off
-    if power_on is True:
+    if power_on:
         dataFragment = b'\x01\x00\x00\x00'
     else:
         dataFragment = b'\x00\x00\x00\x00'
 
-    assert dev.ctrl_transfer(0x21, 1, 0x0000, 0x3a00, dataFragment) == len(dataFragment)
+    assert dev.ctrl_transfer(0x21, channel, 0x0000, 0x3a00, dataFragment) == len(dataFragment)
 
 dev = find_device()
-
+num = 0
 reattach = False
-if dev.is_kernel_driver_active(0):
+if dev.is_kernel_driver_active(num):
     reattach = True
-    dev.detach_kernel_driver(0)
+    dev.detach_kernel_driver(num)
 
-usb.util.claim_interface(dev, 0)
+usb.util.claim_interface(dev, num)
 dev.reset()
-# set the active configuration. With no arguments, the first
-# configuration will be the active one
 dev.set_configuration()
-
-# SEND CONTROL DATA
-# Params are: bmRequestType, bmRequest, wValue, wIndex, dataFragment
-# Copy these from the Wireshark recording
-# Assert return value is length of bytes sent (length of dataFragment)
-
-# Headphone Volume. 2nd byte in data is volume level from 0x00 to 0xff
-dataFragment = b'\x00\xf0\xff\xff'
-assert dev.ctrl_transfer(0x21, 1, 0x0000, 0x3b00, dataFragment) == len(dataFragment)
 
 set_phantom_power(1, True)
 
 # Mic (channel 1) Volume. 2nd byte in data is volume level from 0x00 to 0x31
-dataFragment = b'\x00\x61\x00\x00'
+dataFragment = b'\x00\x11\x00\x00'
 assert dev.ctrl_transfer(0x21, 1, 0x0100, 0x3a00, dataFragment) == len(dataFragment)
-
 
 # This is needed to release interface, otherwise attach_kernel_driver fails 
 # due to "Resource busy"

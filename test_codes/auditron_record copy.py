@@ -11,7 +11,7 @@ p = pyaudio.PyAudio()
 index = -1
 for dev in range(p.get_device_count()):
     dev_info = p.get_device_info_by_index(dev)
-    print(dev_info)
+    # print(dev_info)
     if 'Audient' in dev_info['name']:
         index = dev
         break

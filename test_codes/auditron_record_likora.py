@@ -1,8 +1,36 @@
 # get the libraries
 import pyaudio
 import time
+import argparse
 from scipy.io.wavfile import write
 import numpy as np
+import sys
+
+'''
+-----------------------------------------
+# constructing the argument parse and parse the arguments
+-----------------------------------------
+'''
+ap = argparse.ArgumentParser()
+
+ap.add_argument("-d", "--data_path", type=str, 
+                default='/media/ankit/doc_ankit/reductstore_data', 
+                help="base folder")
+
+ap.add_argument("-s", "--sensor_name", type=str, 
+                required=True, 
+                help="name of the sensor")
+
+ap.add_argument("-t", "--time_of_recording", type=int, 
+                required=True, 
+                help="Recording time")
+
+ap.add_argument("-c", "--channel", type=int, 
+                required=True, 
+                help="Recording channel")
+
+args = vars(ap.parse_args())
+
 
 # create the pyaudio instance
 p = pyaudio.PyAudio()
@@ -17,6 +45,7 @@ for dev in range(p.get_device_count()):
         break
 
 if index >= 0:
+
     # get the audient info
     info = p.get_device_info_by_index(index)
 
@@ -24,19 +53,19 @@ if index >= 0:
     CHANNELS = info['maxInputChannels']
     RATE = info['defaultSampleRate']
     CHUNK = 24000
-    RECORD_SECONDS = 15
+    RECORD_SECONDS = int(args['time_of_recording'])
     FORMAT = pyaudio.paInt16
-    WAVE_OUTPUT_FILENAME = "output_test.wav"
+    WAVE_OUTPUT_FILENAME = f"{args['data_path']}/{args['sensor_name']}_channel{args['channel']:02d}_time{args['time_of_recording']:09d}.wav"
     
     # streaming inputs
     stream = p.open(format=pyaudio.paInt16, channels=CHANNELS, rate=int(RATE), input=True, input_device_index=index)
     start_time = time.time()
     frames = []
     try:
-        print("Recording...")
+        print("Recording...\n")
         while time.time() - start_time < RECORD_SECONDS:
-            data = stream.read(CHUNK)
-            
+            sys.stdout.write(f'\r[INFO]recording for >> {int(time.time() - start_time):04d} seconds')
+            data = stream.read(CHUNK)            
             frames.append(data)
     except KeyboardInterrupt:
         print("Recording stopped by user")

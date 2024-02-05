@@ -1,5 +1,6 @@
 # get the libraries
 import pyaudio
+import argparse
 import time
 from scipy.io.wavfile import write
 import numpy as np
@@ -11,6 +12,12 @@ from scipy.signal import resample
 from pathlib import Path
 from time import time_ns
 from reduct import Client, BucketSettings, QuotaType
+
+ap = argparse.ArgumentParser()
+
+ap.add_argument('-t', '--time', required=True, help='time of recording in second')
+
+# args = ap.
 
 CHUNK = 44100
 RECORD_SECONDS = 10

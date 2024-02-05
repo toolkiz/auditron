@@ -1,0 +1,1 @@
+sudo docker run -p 8383:8383 -v ${PWD}/data:/data reduct/store:latest

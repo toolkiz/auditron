@@ -3,3 +3,10 @@ sudo apt-get install build-essential
 
 #some info:
 M01_S02 was hot
+
+DATE: 05.02.24:
+
+#1. the file structure is present.
+#2. contact Alexei on how to read, preprocess and restore chunks with different bucket name.
+#3. how to pass to NAS from the recording station.
+

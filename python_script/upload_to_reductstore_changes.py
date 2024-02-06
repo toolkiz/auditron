@@ -19,22 +19,18 @@ async def main():
         )
 
         # More complex case. Upload a file in chunks with a custom timestamp unix timestamp in microseconds
-        async def file_reader():
-            """Read the current example in chunks of 50 bytes"""
-            with wave.open(CURRENT_FILE, "rb") as wav_file:
-                file = wav_file.readframes(wav_file.getnframes())
+        """Read the current example in chunks of 50 bytes"""
+        with wave.open(CURRENT_FILE, "rb") as wav_file:
+            file = wav_file.readframes(wav_file.getnframes())
 
-                for i in range(0, len(file), CHUNK):
-                    data = file[i:i+CHUNK]
-                    yield data
+            for i in range(0, len(file), CHUNK):
+                data = file[i:i+CHUNK]
+                # yield data
 
-        ts = int(time_ns() / 10000)
-        await bucket.write(
-            "M00_S01",
-            file_reader(),
-            timestamp=ts,
-            content_length=wave.open(CURRENT_FILE, 'rb').getnframes(),
-        )
+                await bucket.write(
+                    "M00_S01",
+                    data,
+                )
 
 if __name__ == "__main__":
     asyncio.run(main())

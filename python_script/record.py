@@ -7,8 +7,7 @@ import pyaudio
 
 from reduct import Client, BucketSettings, QuotaType
 
-CHUNK = 12000
-RECORD_SECONDS = 10
+CHUNK = 24000
 FORMAT = pyaudio.paInt16
 RATE = CHUNK
 

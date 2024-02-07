@@ -1,11 +1,12 @@
 from reduct import Client, BucketSettings, QuotaType
 from time import time_ns
 import wave
+import os
 
 import asyncio
 
 CURRENT_FILE = '/media/ankit/doc_ankit/reductstore_data/M00_S01_channel01_time000000600.wav'
-CHUNK = 24000
+bucket_name = os.path.basename(CURRENT_FILE)[:7]
 
 async def main():
     # Create a ReductStore client
@@ -18,18 +19,25 @@ async def main():
             exist_ok=True,
         )
 
-        # More complex case. Upload a file in chunks with a custom timestamp unix timestamp in microseconds
-        """Read the current example in chunks of 50 bytes"""
         with wave.open(CURRENT_FILE, "rb") as wav_file:
             file = wav_file.readframes(wav_file.getnframes())
+            channels = wav_file.getnchannels()
+            framerate = wav_file.getframerate()
+
+            CHUNK = framerate * channels
 
             for i in range(0, len(file), CHUNK):
                 data = file[i:i+CHUNK]
-                # yield data
+                # ts = i / CHUNK * 1e6
 
                 await bucket.write(
-                    "M00_S04",
+                    bucket_name,
                     data,
+                    # timestamp=ts,
+                    content_length=len(data),
+                    labels={'sample_rate': framerate,
+                            'channels': channels,
+                            'chunk_size': CHUNK}
                 )
 
 if __name__ == "__main__":

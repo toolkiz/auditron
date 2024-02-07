@@ -5,11 +5,10 @@ import time
 import asyncio
 import pyaudio
 
-from reduct import Client, BucketSettings, QuotaType
+import numpy as np
 
-CHUNK = 24000
-FORMAT = pyaudio.paInt16
-RATE = CHUNK
+from datetime import datetime
+from reduct import Client, BucketSettings, QuotaType
 
 async def main():
     # create the pyaudio instance
@@ -28,23 +27,31 @@ async def main():
         info = p.get_device_info_by_index(index)
 
         # retrieve the constants
-        CHANNELS = info['maxInputChannels']
         async with Client("http://localhost:8383") as client:
 
             bucket = await client.create_bucket("metricspace",
-                                                BucketSettings(quota_type=QuotaType.FIFO, quota_size=1_000_000_000), 
+                                                BucketSettings(quota_type=QuotaType.FIFO, quota_size=1_000_000_000_000), 
                                                 exist_ok=True,)
         
             # streaming inputs
-            stream = p.open(format=FORMAT, channels=CHANNELS, rate=int(RATE), input=True, input_device_index=index)
-            frames = []
+            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=4096)
             try:
                 print("Recording...")
                 while True:
                     sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
-                    data = stream.read(CHUNK)
-                    await bucket.write(f"raw_data", data)
-                    frames.append(data)
+                    data = stream.read(int(info['defaultSampleRate']))
+                    await bucket.write(f"test_2", 
+                                       data,
+                                       timestamp=int(datetime.now().timestamp() * 1e6),
+                                       content_length=len(data),
+                                       labels={'sample_rate': int(info['defaultSampleRate']),
+                                               'channels': int(info['maxInputChannels']),
+                                               'chunk_size': int(info['defaultSampleRate'])}
+                                       )
+                    
+                    audio_data = np.frombuffer(data, dtype=np.int16)
+                    audio_data = audio_data.reshape(-1, int(info['maxInputChannels']))
+
             except KeyboardInterrupt:
                 print("Recording stopped by user")
 

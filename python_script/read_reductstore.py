@@ -60,18 +60,28 @@ async def main():
                 audio_data = audio_data.reshape(-1, int(record.labels['channels']))
                 # --------------------------------------------------------------------------
 
-                # getting the signal processed for blender                
+                # # getting the signal processed for blender                
+                # blender_values = np.zeros((3, int(record.labels['channels'])))
+
+                # for i in range(int(record.labels['channels'])):
+                #     control_data = audio_data[:, i].astype(np.float32)
+                #     max_int16 = np.iinfo(np.int16).max
+                #     control_data /= max_int16  # Normalize to -1.0 to 1.0
+
+                #     # getting 1 value per channel
+                #     blender_values[0,i] = calculate_amplitude(control_data) / np.iinfo(np.int16).max #calculating the amplitude values
+                #     blender_values[1,i] = calculate_fundamental_frequency(control_data, target_rate) / target_rate #calculating the fundamental frequencies
+                #     blender_values[2,i] = calculate_energy(control_data) #calculating the total energy
+                
+                max_int16 = np.iinfo(np.int16).max
+                normalized_data = audio_data.astype(np.float32) / max_int16  # Normalize entire array
+
+                # Calculate values for all channels using vectorized functions
                 blender_values = np.zeros((3, int(record.labels['channels'])))
+                blender_values[0, :] = np.apply_along_axis(calculate_amplitude, 0, normalized_data)
+                blender_values[1, :] = np.apply_along_axis(calculate_fundamental_frequency, 0, normalized_data, target_rate) / target_rate
+                blender_values[2, :] = np.apply_along_axis(calculate_energy, 0, normalized_data)
 
-                for i in range(int(record.labels['channels'])):
-                    control_data = audio_data[:, i].astype(np.float32)
-                    max_int16 = np.iinfo(np.int16).max
-                    control_data /= max_int16  # Normalize to -1.0 to 1.0
-
-                    # getting 1 value per channel
-                    blender_values[0,i] = calculate_amplitude(control_data) / np.iinfo(np.int16).max #calculating the amplitude values
-                    blender_values[1,i] = calculate_fundamental_frequency(control_data, target_rate) / target_rate #calculating the fundamental frequencies
-                    blender_values[2,i] = calculate_energy(control_data) #calculating the total energy
                 
                 blender_data = blender_values.flatten().tobytes()
                 await bucket.write(

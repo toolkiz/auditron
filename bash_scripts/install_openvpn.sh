@@ -11,7 +11,7 @@ Description=Custom OpenVPN client instance
 After=network.target
 
 [Service]
-ExecStart=/usr/sbin/openvpn --config /root/document/config.ovpn
+ExecStart=/usr/sbin/openvpn --config /home/ankit/Documents/metricspace/AnkitLaptop_ankitghosh@metricspace.openvpn.com_[Frankfurt].ovpn
 Restart=always
 RestartSec=3
 Type=simple

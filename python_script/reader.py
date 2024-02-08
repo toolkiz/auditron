@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # EXAMPLE USAGE
 # python reader.py -b bucket_name -t0 1707394990549623 - t1 1707395000581107
 

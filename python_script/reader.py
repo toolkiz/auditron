@@ -1,3 +1,7 @@
+# EXAMPLE USAGE
+# python reader.py -b bucket_name -t0 1707394990549623 - t1 1707395000581107
+
+
 import asyncio
 import argparse
 
@@ -12,16 +16,16 @@ from reduct import Client, BucketSettings, QuotaType
 '''
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-b", "--bucket_name", type=str, default='test_5_parameters',
-                # required=True, 
+ap.add_argument("-b", "--bucket_name", type=str, #default='test_5_parameters',
+                required=True, 
                 help="bucket to read from")
 
-ap.add_argument("-t0", "--start_time", type=int, default=1707394990549623,
-                # required=True, 
+ap.add_argument("-t0", "--start_time", type=int, #default=1707394990549623,
+                required=True, 
                 help="start-time with UNIX microsecond format")
 
-ap.add_argument("-t1", "--stop_time", type=int, default=1707395000581107,
-                # required=True, 
+ap.add_argument("-t1", "--stop_time", type=int, #default=1707395000581107,
+                required=True, 
                 help="stop-time with UNIX microsecond format")
 
 args = vars(ap.parse_args())
@@ -45,10 +49,6 @@ async def main(bucket_name, start_ts, stop_ts):
                 
                 # data processing 
                 # ------------------
-
-                # getting the audio data from the byte format
-
-                # --------------------------------------------------------------------------
                 blender_data = np.frombuffer(data, dtype=record.labels['dtype'])
                 blender_data = blender_data.reshape(-1, int(record.labels['parameters']))
 

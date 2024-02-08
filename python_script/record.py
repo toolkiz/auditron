@@ -46,7 +46,7 @@ async def main():
         info = p.get_device_info_by_index(index)
 
         # retrieve the constants
-        async with Client("http://100.96.1.20:8383") as client:
+        async with Client("http://0.0.0.0:8383") as client:
 
             bucket = await client.create_bucket("metricspace",
                                                 BucketSettings(quota_type=QuotaType.FIFO, quota_size=1_000_000_000_000), 

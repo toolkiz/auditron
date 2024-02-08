@@ -27,7 +27,7 @@ def calculate_fundamental_frequency(channel_data, rate):
 def calculate_energy(channel_data):
     return np.sum(channel_data.astype(float)**2) / len(channel_data)
 
-bucket_name = 'test_3'
+bucket_name = 'test_5'
 
 async def main():
     # create the pyaudio instance
@@ -46,7 +46,7 @@ async def main():
         info = p.get_device_info_by_index(index)
 
         # retrieve the constants
-        async with Client("http://localhost:8383") as client:
+        async with Client("http://100.96.1.20:8383") as client:
 
             bucket = await client.create_bucket("metricspace",
                                                 BucketSettings(quota_type=QuotaType.FIFO, quota_size=1_000_000_000_000), 

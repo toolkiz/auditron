@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Access variables
+config_file_path="$1"
+
 # Update and install OpenVPN
 sudo apt update
 sudo apt install openvpn -y
@@ -11,7 +14,7 @@ Description=Custom OpenVPN client instance
 After=network.target
 
 [Service]
-ExecStart=/usr/sbin/openvpn --config /home/ankit/Documents/metricspace/AnkitLaptop_ankitghosh@metricspace.openvpn.com_[Frankfurt].ovpn
+ExecStart=/usr/sbin/openvpn --config $config_file_path
 Restart=always
 RestartSec=3
 Type=simple

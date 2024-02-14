@@ -1,4 +1,5 @@
 # get the libraries
+import os
 import pyaudio
 import time
 import argparse
@@ -31,6 +32,11 @@ ap.add_argument("-c", "--channel", type=int,
 
 args = vars(ap.parse_args())
 
+try:
+    os.makedirs(args['data_path'])
+except:
+    pass
+
 
 # create the pyaudio instance
 p = pyaudio.PyAudio()
@@ -59,13 +65,17 @@ if index >= 0:
     
     # streaming inputs
     stream = p.open(format=pyaudio.paInt16, channels=CHANNELS, rate=int(RATE), input=True, input_device_index=index)
+    # stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=8192)
+
     start_time = time.time()
     frames = []
     try:
-        print("Recording...\n")
+        print(f"Recording started at {time.strftime("%Y-%m-%d %H:%M:%S")} ...\n")
         while time.time() - start_time < RECORD_SECONDS:
-            sys.stdout.write(f'\r[INFO]recording for >> {int(time.time() - start_time):04d} seconds')
-            data = stream.read(CHUNK)            
+            sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
+            # sys.stdout.write(f'\r[INFO]recording for >> {int(time.time() - start_time):04d} seconds')
+            data = stream.read(CHUNK)       
+            # data = stream.read(int(info['defaultSampleRate'])//2)     
             frames.append(data)
     except KeyboardInterrupt:
         print("Recording stopped by user")

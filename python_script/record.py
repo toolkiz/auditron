@@ -27,7 +27,7 @@ def calculate_fundamental_frequency(channel_data, rate):
 def calculate_energy(channel_data):
     return np.sum(channel_data.astype(float)**2) / len(channel_data)
 
-bucket_name = 'test_5'
+bucket_name = 'likora1'
 
 async def main():
     # create the pyaudio instance
@@ -48,18 +48,18 @@ async def main():
         # retrieve the constants
         async with Client("http://0.0.0.0:8383") as client:
 
-            bucket = await client.create_bucket("metricspace",
+            bucket = await client.create_bucket("likora",
                                                 BucketSettings(quota_type=QuotaType.FIFO, quota_size=1_000_000_000_000), 
                                                 exist_ok=True,)
         
             # streaming inputs
-            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=4096)
+            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=16384)
             try:
-                print("Recording...")
+                print(f"Recording started at {time.strftime('%Y-%m-%d %H:%M:%S')} ...")
                 while True:
                     sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
                     ts = int(datetime.now().timestamp() * 1e6)
-                    data = stream.read(int(info['defaultSampleRate']))
+                    data = stream.read(24000)
                     await bucket.write(f"{bucket_name}", 
                                        data,
                                        timestamp=ts,

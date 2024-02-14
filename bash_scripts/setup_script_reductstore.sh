@@ -1,1 +1,1 @@
-sudo docker run -p 8383:8383 -v /media/metricspace/likora_office/data reduct/store:latest
+sudo docker run -p 8383:8383 -v /media/metricspace/likora_office/likora_onsite reduct/store:latest

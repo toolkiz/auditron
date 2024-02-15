@@ -6,6 +6,7 @@
 
 import asyncio
 import argparse
+import pickle
 
 import numpy as np
 
@@ -18,16 +19,16 @@ from reduct import Client, BucketSettings, QuotaType
 '''
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-b", "--bucket_name", type=str, #default='test_5_parameters',
-                required=True, 
+ap.add_argument("-b", "--bucket_name", type=str, default='likoranpp_parameters',
+                # required=True, 
                 help="bucket to read from")
 
-ap.add_argument("-t0", "--start_time", type=int, #default=1707394990549623,
-                required=True, 
+ap.add_argument("-t0", "--start_time", type=int, default=1707918379279762,
+                # required=True, 
                 help="start-time with UNIX microsecond format")
 
-ap.add_argument("-t1", "--stop_time", type=int, #default=1707395000581107,
-                required=True, 
+ap.add_argument("-t1", "--stop_time", type=int, default=1708218379279762,
+                # required=True, 
                 help="stop-time with UNIX microsecond format")
 
 args = vars(ap.parse_args())
@@ -38,7 +39,7 @@ async def main(bucket_name, start_ts, stop_ts):
 
         # creating the bucket
         bucket = await client.create_bucket(
-            "metricspace",
+            "likora",
             BucketSettings(quota_type=QuotaType.NONE),
             exist_ok=True,
         )
@@ -59,4 +60,8 @@ async def main(bucket_name, start_ts, stop_ts):
         return np.array(all_data_within_time)
 
 if __name__ == "__main__":
-    asyncio.run(main(bucket_name=args['bucket_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
+    array_object = asyncio.run(main(bucket_name=args['bucket_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
+
+    pickle.dump(array_object, open('blender_array.aud', 'wb'))
+
+    # print(array_object

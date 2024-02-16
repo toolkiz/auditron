@@ -18,16 +18,16 @@ ap.add_argument("-d", "--data_path", type=str,
                 default='/media/ankit/doc_ankit/reductstore_data', 
                 help="base folder")
 
-ap.add_argument("-s", "--sensor_name", type=str, 
-                required=True, 
+ap.add_argument("-s", "--sensor_name", type=str, default='random',
+                # required=True, 
                 help="name of the sensor")
 
-ap.add_argument("-t", "--time_of_recording", type=int, 
-                required=True, 
+ap.add_argument("-t", "--time_of_recording", type=int, default=10,
+                # required=True, 
                 help="Recording time")
 
-ap.add_argument("-c", "--channel", type=int, 
-                required=True, 
+ap.add_argument("-c", "--channel", type=int, default=9,
+                # required=True, 
                 help="Recording channel")
 
 args = vars(ap.parse_args())
@@ -70,7 +70,7 @@ if index >= 0:
     start_time = time.time()
     frames = []
     try:
-        print(f"Recording started at {time.strftime("%Y-%m-%d %H:%M:%S")} ...\n")
+        # print(f"Recording started at {time.strftime("%Y-%m-%d %H:%M:%S")} ...\n")
         while time.time() - start_time < RECORD_SECONDS:
             sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
             # sys.stdout.write(f'\r[INFO]recording for >> {int(time.time() - start_time):04d} seconds')

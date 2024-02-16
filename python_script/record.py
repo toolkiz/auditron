@@ -27,7 +27,7 @@ def calculate_fundamental_frequency(channel_data, rate):
 def calculate_energy(channel_data):
     return np.sum(channel_data.astype(float)**2) / len(channel_data)
 
-bucket_name = 'likora1'
+bucket_name = 'likora_overflow'
 
 async def main():
     # create the pyaudio instance
@@ -53,13 +53,14 @@ async def main():
                                                 exist_ok=True,)
         
             # streaming inputs
-            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=16384)
+            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=4096)
             try:
                 print(f"Recording started at {time.strftime('%Y-%m-%d %H:%M:%S')} ...")
                 while True:
                     sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
                     ts = int(datetime.now().timestamp() * 1e6)
-                    data = stream.read(24000)
+                    
+                    data = stream.read(int(info['defaultSampleRate']), exception_on_overflow = False)
                     await bucket.write(f"{bucket_name}", 
                                        data,
                                        timestamp=ts,

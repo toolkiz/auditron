@@ -29,7 +29,7 @@ ap.add_argument("-t0", "--start_time", type=int, default=1707918379279762,
 
 ap.add_argument("-t1", "--stop_time", type=int, default=1708218379279762,
                 # required=True, 
-                help="stop-time with UNIX microsecond format")
+                help="bucket to read from")
 
 args = vars(ap.parse_args())
 

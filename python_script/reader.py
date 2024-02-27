@@ -23,11 +23,11 @@ ap.add_argument("-b", "--bucket_name", type=str, default='likoranpp_parameters',
                 # required=True, 
                 help="bucket to read from")
 
-ap.add_argument("-t0", "--start_time", type=int, default=1707918379279762,
+ap.add_argument("-t0", "--start_time", type=int, default=1707856233000000,#1707918379279762,
                 # required=True, 
                 help="start-time with UNIX microsecond format")
 
-ap.add_argument("-t1", "--stop_time", type=int, default=1708218379279762,
+ap.add_argument("-t1", "--stop_time", type=int, default=1708029033000000,#1708218379279762,
                 # required=True, 
                 help="bucket to read from")
 

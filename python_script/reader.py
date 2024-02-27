@@ -3,10 +3,10 @@
 # EXAMPLE USAGE
 # python reader.py -b bucket_name -t0 1707394990549623 - t1 1707395000581107
 
-
+import pickle
 import asyncio
 import argparse
-import pickle
+import datetime
 
 import numpy as np
 
@@ -48,6 +48,7 @@ async def main(bucket_name, start_ts, stop_ts):
         async for record in bucket.query(bucket_name, start=start_ts, stop=stop_ts):
             print(f"Record timestamp: {record.timestamp}")
             print(f"Record size: {record.size}")
+            
             async for data in record.read(record.size):
                 
                 # data processing 

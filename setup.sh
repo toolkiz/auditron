@@ -5,15 +5,15 @@ echo "First argument: $1"
 config_file_path="$1"
 
 # 1. Install Docker
-./bash_script/install_docker.sh
+sudo ./bash_scripts/install_docker.sh
 
 # 2. Install PyAudio dependencies
-./bash_script/install_pyaudio_dependencies.sh
+sudo ./bash_scripts/install_pyaudio_dependencies.sh
 
 # 3. Install Conda if not already installed
 if ! command -v conda &> /dev/null
 then
-    ./bash_script/install_conda.sh
+    sudo ./bash_scripts/install_conda.sh
 else
     echo "Conda is already installed."
 fi
@@ -38,7 +38,7 @@ fi
 # Check if OpenVPN is installed
 if ! command -v openvpn &> /dev/null; then
     echo "OpenVPN not found. Installing..."
-    ./bash_script/install_openvpn.sh $config_file_path
+    ./bash_scripts/install_openvpn.sh $config_file_path
 else
     echo "OpenVPN is already installed."
 fi

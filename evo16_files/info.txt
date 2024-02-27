@@ -10,3 +10,6 @@ DATE: 05.02.24:
 #2. contact Alexei on how to read, preprocess and restore chunks with different bucket name.
 #3. how to pass to NAS from the recording station.
 
+#todo:
+1. bandwidth
+2. up/download speed

@@ -60,8 +60,6 @@ async def main(bucket_name, start_ts, stop_ts):
                     arr = audio_data.copy()
                 else:
                     arr = np.append(arr, audio_data)
-
-                # all_data_within_time.append(blender_data)
                 
         return arr, int(record.labels['sample_rate']), int(record.labels['channels'])
 

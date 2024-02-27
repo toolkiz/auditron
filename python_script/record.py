@@ -27,7 +27,8 @@ def calculate_fundamental_frequency(channel_data, rate):
 def calculate_energy(channel_data):
     return np.sum(channel_data.astype(float)**2) / len(channel_data)
 
-bucket_name = 'likora_overflow'
+bucket_name = 'octopus'
+chunk = 4096
 
 async def main():
     # create the pyaudio instance
@@ -53,17 +54,22 @@ async def main():
                                                 exist_ok=True,)
         
             # streaming inputs
-            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=4096)
+            stream = p.open(format=pyaudio.paInt16, channels=int(info['maxInputChannels']), rate=int(info['defaultSampleRate']), input=True, input_device_index=index, frames_per_buffer=chunk)
             try:
                 print(f"Recording started at {time.strftime('%Y-%m-%d %H:%M:%S')} ...")
                 while True:
                     sys.stdout.write(f'\r{time.strftime("%Y-%m-%d %H:%M:%S")}')
-                    ts = int(datetime.now().timestamp() * 1e6)
+                    # ts = int(datetime.now().timestamp() * 1e6)
                     
                     data = stream.read(int(info['defaultSampleRate']), exception_on_overflow = False)
+                    # try:
+                    #     data = stream.read(chunk)
+                    # except Exception as e:
+                    #     print(e)
+                    #     continue
                     await bucket.write(f"{bucket_name}", 
                                        data,
-                                       timestamp=ts,
+                                    #    timestamp=ts,
                                        content_length=len(data),
                                        labels={'sample_rate': int(info['defaultSampleRate']),
                                                'channels': int(info['maxInputChannels']),
@@ -85,7 +91,7 @@ async def main():
                     await bucket.write(
                         f'{bucket_name}_parameters',
                         blender_data,
-                        timestamp=ts,
+                        # timestamp=ts,
                         # content_length=len(blender_values.flatten()),
                         labels={'dtype': blender_values.dtype,
                                 'channels': int(info['maxInputChannels']),
@@ -94,6 +100,9 @@ async def main():
 
             except KeyboardInterrupt:
                 print("Recording stopped by user")
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
 
             # put them in reduct database
             stream.stop_stream()

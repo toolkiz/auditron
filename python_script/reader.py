@@ -3,7 +3,6 @@
 # EXAMPLE USAGE
 # python reader.py -b bucket_name -t0 '%Y-%m-%d %H:%M' - t1 '%Y-%m-%d %H:%M'
 
-import pytz
 import pickle
 import asyncio
 import argparse
@@ -34,6 +33,14 @@ ap.add_argument("-t1", "--stop_time", type=str, default='2024-02-14 14:48',#1708
 
 args = vars(ap.parse_args())
 
+def unix_microsecond_format(timestamp):
+
+    datetime_obj = datetime.strptime(timestamp, '%Y-%m-%d %H:%M')
+    timestamp = datetime_obj.timestamp()
+    microseconds = int(timestamp * 1_000_000)
+
+    return microseconds
+
 async def main(bucket_name, start_ts, stop_ts):
     # Create a ReductStore client
     async with Client("http://0.0.0.0:8383") as client:
@@ -45,32 +52,45 @@ async def main(bucket_name, start_ts, stop_ts):
             exist_ok=True,
         )
         
-        all_data_within_time = []
+        # all_data_within_time = []
+        cumulative_data = []
 
-        datetime_obj0 = datetime.strptime(start_ts, '%Y-%m-%d %H:%M')
-        # datetime_obj_utc0 = datetime_obj0.replace(tzinfo=pytz.utc)
-        timestamp0 = datetime_obj0.timestamp()
-        ts0 = int(timestamp0 * 1_000_000)
+        # creating the time in milisecond
+        # ----------------------------------
+        ts0 = unix_microsecond_format(start_ts)
+        ts1 = unix_microsecond_format(stop_ts)
 
-        datetime_obj1 = datetime.strptime(stop_ts, '%Y-%m-%d %H:%M')
-        # datetime_obj_utc1 = datetime_obj1.replace(tzinfo=pytz.utc)
-        timestamp1 = datetime_obj1.timestamp()
-        ts1 = int(timestamp1 * 1_000_000)
+        async for record in bucket.query(bucket_name, start=ts0, stop=ts1, ttl=1000):
+            # print(f"Record timestamp: {record.timestamp}")
+            # print(f"Record size: {record.size}")
 
-        async for record in bucket.query(bucket_name, start=ts0, stop=ts1):
-            print(f"Record timestamp: {record.timestamp}")
-            print(f"Record size: {record.size}")
+            data = await record.read_all()
+            cumulative_data.append(data)
             
-            async for data in record.read(record.size):
+            # async for data in record.read(record.size):
                 
-                # data processing 
-                # ------------------
-                blender_data = np.frombuffer(data, dtype=record.labels['dtype'])
-                blender_data = blender_data.reshape(-1, int(record.labels['parameters']))
+            #     # data processing 
+            #     # ------------------
+            #     blender_data = np.frombuffer(data, dtype=record.labels['dtype'])
+            #     blender_data = blender_data.reshape(-1, int(record.labels['parameters']))
 
-                all_data_within_time.append(blender_data)
-                
-        return np.array(all_data_within_time)
+            #     all_data_within_time.append(blender_data)
+        
+        if len(cumulative_data) > 0:
+            feature_data = b''.join(cumulative_data)
+            feature_data = np.frombuffer(feature_data, dtype=record.labels['dtype'])
+
+            batch = len(cumulative_data)
+
+            dividend = len(feature_data) % (int(record.labels['parameters']) * int(record.labels['channels']))
+            if dividend > 0:
+                feature_data = feature_data[:-dividend]
+            feature_data = feature_data.reshape(batch, int(record.labels['channels']), int(record.labels['parameters']))
+                    
+            # return np.array(all_data_within_time)
+            return feature_data
+        else:
+            return np.array(cumulative_data)
 
 if __name__ == "__main__":
     array_object = asyncio.run(main(bucket_name=args['bucket_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))

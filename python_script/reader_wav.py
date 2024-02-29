@@ -69,6 +69,9 @@ if __name__ == "__main__":
     if dividend > 0:
         data = data[:-dividend] 
     data = data.reshape(-1, channels)
+
+    #compress and decompress
+
     sf.write('sample_output.wav', data, fs)
 
     # pickle.dump(array_object, open('blender_array.aud', 'wb'))

@@ -62,11 +62,9 @@ async def main():
                     # ts = int(datetime.now().timestamp() * 1e6)
                     
                     data = stream.read(int(info['defaultSampleRate']), exception_on_overflow = False)
-                    # try:
-                    #     data = stream.read(chunk)
-                    # except Exception as e:
-                    #     print(e)
-                    #     continue
+
+                    #signal compress
+
                     await bucket.write(f"{bucket_name}", 
                                        data,
                                     #    timestamp=ts,

@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # EXAMPLE USAGE
-# python reader.py -b bucket_name -t0 1707394990549623 - t1 1707395000581107
+# python reader.py -b bucket_name -t0 '%Y-%m-%d %H:%M' - t1 '%Y-%m-%d %H:%M'
 
+import pytz
 import pickle
 import asyncio
 import argparse
-import datetime
 
 import numpy as np
 
+from datetime import datetime
 from reduct import Client, BucketSettings, QuotaType
 
 '''
@@ -23,11 +24,11 @@ ap.add_argument("-b", "--bucket_name", type=str, default='likoranpp_parameters',
                 # required=True, 
                 help="bucket to read from")
 
-ap.add_argument("-t0", "--start_time", type=int, default=1707856233000000,#1707918379279762,
+ap.add_argument("-t0", "--start_time", type=str, default='2024-02-14 14:47',#1707918379279762,
                 # required=True, 
                 help="start-time with UNIX microsecond format")
 
-ap.add_argument("-t1", "--stop_time", type=int, default=1708029033000000,#1708218379279762,
+ap.add_argument("-t1", "--stop_time", type=str, default='2024-02-14 14:48',#1708218379279762,
                 # required=True, 
                 help="bucket to read from")
 
@@ -45,7 +46,18 @@ async def main(bucket_name, start_ts, stop_ts):
         )
         
         all_data_within_time = []
-        async for record in bucket.query(bucket_name, start=start_ts, stop=stop_ts):
+
+        datetime_obj0 = datetime.strptime(start_ts, '%Y-%m-%d %H:%M')
+        # datetime_obj_utc0 = datetime_obj0.replace(tzinfo=pytz.utc)
+        timestamp0 = datetime_obj0.timestamp()
+        ts0 = int(timestamp0 * 1_000_000)
+
+        datetime_obj1 = datetime.strptime(stop_ts, '%Y-%m-%d %H:%M')
+        # datetime_obj_utc1 = datetime_obj1.replace(tzinfo=pytz.utc)
+        timestamp1 = datetime_obj1.timestamp()
+        ts1 = int(timestamp1 * 1_000_000)
+
+        async for record in bucket.query(bucket_name, start=ts0, stop=ts1):
             print(f"Record timestamp: {record.timestamp}")
             print(f"Record size: {record.size}")
             

@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.zip
 *.wav
+*.aac
 data/
 # C extensions
 records/

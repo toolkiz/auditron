@@ -34,13 +34,62 @@ ap.add_argument("-en", "--entry_name", type=str, default='abstract',
 args = vars(ap.parse_args())
 
 class static_feature_extractor:
+    """
+    A class used to extract static features from channel data.
+    
+    Methods
+    -------
+    calculate_amplitude(channel_data):
+        Calculates the amplitude of the given channel data.
+        
+    calculate_fundamental_frequency(channel_data, sample_frequency):
+        Determines the fundamental frequency of the given channel data using a Fourier Transform.
+        
+    calculate_energy(channel_data):
+        Computes the total energy of the given channel data.
+    """
+
     def __init__(self):
+        """
+        Initializes the static_feature_extractor instance.
+        """
+
         self.x = 0
 
     def calculate_amplitude(self, channel_data):
+        """
+        Calculates the amplitude of the given channel data.
+
+        Parameters
+        ----------
+        channel_data : np.ndarray
+            The data array from which to calculate the amplitude.
+            
+        Returns
+        -------
+        float
+            The maximum amplitude of the channel data.
+        """
+
         return np.max(np.abs(channel_data))
 
     def calculate_fundamental_frequency(self, channel_data, sample_frequency):
+        """
+        Determines the fundamental frequency of the given channel data.
+
+        Parameters
+        ----------
+        channel_data : np.ndarray
+            The data array from which to find the fundamental frequency.
+        sample_frequency : float
+            The sampling frequency of the data.
+            
+        Returns
+        -------
+        float
+            The fundamental frequency of the channel data.
+        """
+
         # Perform Fourier Transform
         N = len(channel_data)
         yf = rfft(channel_data)
@@ -51,11 +100,39 @@ class static_feature_extractor:
         return xf[idx]
 
     def calculate_energy(self, channel_data):
+        """
+        Computes the total energy of the given channel data.
+
+        Parameters
+        ----------
+        channel_data : np.ndarray
+            The data array from which to calculate the energy.
+            
+        Returns
+        -------
+        float
+            The total energy of the channel data.
+        """
+
         return np.sum(channel_data.astype(float)**2) / len(channel_data)
 
 chunk = 8192
 
 async def main(ip_addr, bucket_name, entry_name):
+    """
+    Main entry point for the audio recording and processing application.
+    
+    This async function configures an audio input stream using pyaudio, connects to a ReductStore
+    bucket, and performs continuous audio data capture and feature extraction. Extracted features
+    are then written to the specified ReductStore bucket. The process runs indefinitely until
+    interrupted by the user.
+
+    Parameters:
+    ip_addr (str): The IP address for the ReductStore client connection.
+    bucket_name (str): The name of the bucket to create or use in the ReductStore.
+    entry_name (str): The base name for entries written to the bucket.
+    """
+    
     # create the pyaudio instance
     p = pyaudio.PyAudio()
 

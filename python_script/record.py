@@ -64,7 +64,6 @@ async def main():
                     data = stream.read(int(info['defaultSampleRate']), exception_on_overflow = False)
 
                     #signal compress
-
                     await bucket.write(f"{bucket_name}", 
                                        data,
                                     #    timestamp=ts,

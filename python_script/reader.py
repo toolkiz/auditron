@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # EXAMPLE USAGE
-# python reader.py -b bucket_name -t0 '%Y-%m-%d %H:%M' - t1 '%Y-%m-%d %H:%M'
+# python reader.py -a http://0.0.0.0:8383 -bn bucket_name -en entry_name -t0 %Y-%m-%d %H:%M - t1 %Y-%m-%d %H:%M
 
 import pickle
 import asyncio
@@ -9,8 +9,8 @@ import argparse
 
 import numpy as np
 
+from reduct import Client
 from datetime import datetime
-from reduct import Client, BucketSettings, QuotaType
 
 '''
 -----------------------------------------
@@ -19,9 +19,17 @@ from reduct import Client, BucketSettings, QuotaType
 '''
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-b", "--bucket_name", type=str, default='likoranpp_parameters',
+ap.add_argument("-a", "--ip_address", type=str, default="http://0.0.0.0:8383",
                 # required=True, 
                 help="bucket to read from")
+
+ap.add_argument("-bn", "--bucket_name", type=str, default='likora',
+                # required=True, 
+                help="bucket to read from")
+
+ap.add_argument("-en", "--entry_name", type=str, default='likoranpp_parameters',
+                # required=True, 
+                help="entry to read from")
 
 ap.add_argument("-t0", "--start_time", type=str, default='2024-02-14 14:47',#1707918379279762,
                 # required=True, 
@@ -43,14 +51,9 @@ def unix_microsecond_format(timestamp):
 
 async def main(bucket_name, start_ts, stop_ts):
     # Create a ReductStore client
-    async with Client("http://0.0.0.0:8383") as client:
+    async with Client(args["ip_address"]) as client:
 
-        # creating the bucket
-        bucket = await client.create_bucket(
-            "likora",
-            BucketSettings(quota_type=QuotaType.NONE),
-            exist_ok=True,
-        )
+        bucket = await client.get_bucket(args['bucket_name'])
         
         # all_data_within_time = []
         cumulative_data = []
@@ -82,7 +85,7 @@ async def main(bucket_name, start_ts, stop_ts):
 
             batch = len(cumulative_data)
 
-            dividend = len(feature_data) % (int(record.labels['parameters']) * int(record.labels['channels']))
+            dividend = len(feature_data) % (int(record.labels['parameters']) * int(record.labels['channels']) * batch)
             if dividend > 0:
                 feature_data = feature_data[:-dividend]
             feature_data = feature_data.reshape(batch, int(record.labels['channels']), int(record.labels['parameters']))
@@ -93,7 +96,7 @@ async def main(bucket_name, start_ts, stop_ts):
             return np.array(cumulative_data)
 
 if __name__ == "__main__":
-    array_object = asyncio.run(main(bucket_name=args['bucket_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
+    array_object = asyncio.run(main(bucket_name=args['entry_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
 
     pickle.dump(array_object, open('blender_array.aud', 'wb'))
 

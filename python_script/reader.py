@@ -61,13 +61,14 @@ def unix_microsecond_format(timestamp):
 
     return microseconds
 
-async def main(bucket_name, entry_name, start_ts, stop_ts):
+async def main(ip_addr, bucket_name, entry_name, start_ts, stop_ts):
     '''
     Asynchronously queries a ReductStore bucket and retrieves entries within a specified time range.
 
     This function creates a ReductStore client, queries the specified bucket for entries with the given name that fall within the start and stop timestamps, and processes the cumulative data into a feature data array.
 
     Parameters:
+    ip_addr (str): The ip_address of the ReductStore
     bucket_name (str): The name of the ReductStore bucket to query.
     entry_name (str): The name of the entry to query within the bucket.
     start_ts (str): The start timestamp in '%Y-%m-%d %H:%M' format.
@@ -78,7 +79,7 @@ async def main(bucket_name, entry_name, start_ts, stop_ts):
     '''
 
     # Create a ReductStore client
-    async with Client(args["ip_address"]) as client:
+    async with Client(ip_addr) as client:
 
         # get the bucket
         bucket = await client.get_bucket(bucket_name)
@@ -110,5 +111,5 @@ async def main(bucket_name, entry_name, start_ts, stop_ts):
             return np.array(cumulative_data)
 
 if __name__ == "__main__":
-    array_object = asyncio.run(main(bucket_name=args['bucket_name'], entry_name=args['entry_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
+    array_object = asyncio.run(main(ip_addr=args['ip_address'], bucket_name=args['bucket_name'], entry_name=args['entry_name'], start_ts=args['start_time'], stop_ts=args['stop_time']))
     pickle.dump(array_object, open('blender_array.aud', 'wb'))

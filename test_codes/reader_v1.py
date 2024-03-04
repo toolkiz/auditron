@@ -53,19 +53,31 @@ async def main(bucket_name, start_ts, stop_ts):
     # Create a ReductStore client
     async with Client(args["ip_address"]) as client:
 
-        # get the bucket
         bucket = await client.get_bucket(args['bucket_name'])
+        
+        # all_data_within_time = []
+        cumulative_data = []
 
         # creating the time in milisecond
+        # ----------------------------------
         ts0 = unix_microsecond_format(start_ts)
         ts1 = unix_microsecond_format(stop_ts)
 
-        cumulative_data = []
-
         async for record in bucket.query(bucket_name, start=ts0, stop=ts1, ttl=1000):
+            # print(f"Record timestamp: {record.timestamp}")
+            # print(f"Record size: {record.size}")
 
             data = await record.read_all()
             cumulative_data.append(data)
+            
+            # async for data in record.read(record.size):
+                
+            #     # data processing 
+            #     # ------------------
+            #     blender_data = np.frombuffer(data, dtype=record.labels['dtype'])
+            #     blender_data = blender_data.reshape(-1, int(record.labels['parameters']))
+
+            #     all_data_within_time.append(blender_data)
         
         if len(cumulative_data) > 0:
             feature_data = b''.join(cumulative_data)
@@ -78,6 +90,7 @@ async def main(bucket_name, start_ts, stop_ts):
                 feature_data = feature_data[:-dividend]
             feature_data = feature_data.reshape(batch, int(record.labels['channels']), int(record.labels['parameters']))
                     
+            # return np.array(all_data_within_time)
             return feature_data
         else:
             return np.array(cumulative_data)

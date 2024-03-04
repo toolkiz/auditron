@@ -19,7 +19,7 @@ from reduct import Client, BucketSettings, QuotaType
 '''
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-a", "--ip_address", type=str, default="http://0.0.0.0:8383",
+ap.add_argument("-a", "--ip_address", type=str, default="http://100.96.1.30:8383",
                 # required=True, 
                 help="bucket to read from")
 
